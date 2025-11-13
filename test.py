@@ -79,3 +79,23 @@ def main(stdscr):
             stdscr.getch()
 
 curses.wrapper(main)
+
+import curses
+
+def main(stdscr):                # stdscr = "standard screen" (fenêtre principale)
+    curses.curs_set(0)           # cacher le curseur
+    curses.start_color()         # activer les couleurs
+    curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)
+
+    while True:
+        stdscr.clear()           # efface tout l’écran
+        stdscr.attron(curses.color_pair(1))
+        stdscr.addstr(5, 10, "Hello, curses !")  # (y, x, texte)
+        stdscr.attroff(curses.color_pair(1))
+        stdscr.refresh()         # afficher les changements
+
+        key = stdscr.getch()     # lire une touche
+        if key == ord('q'):      # si 'q' → quitter
+            break
+
+curses.wrapper(main) 

@@ -1,0 +1,14 @@
+[
+    {
+        "titre": "Inception",
+        "duree": 148,
+        "note": 9,
+        "style": "Sci-Fi"
+    },
+    {
+        "titre": "Evadé",
+        "duree": 250,
+        "note": 100,
+        "style": "classique"
+    }
+]
