@@ -90,7 +90,7 @@ class CinemaService:
         """Retourne les séances d'une date donnée."""
         return [s for s in self.seances if s.horaire.date() == date.date()]
 
-    def creer_reservation(self, seance_index: int, nom_client: str, nb_places: int, tarif: Tarif) -> Reservation:
+    def creer_reservation(self, seance_index: int, nom_client: str, nb_places: int, tarif: Tarif, numeros_places: Optional[List[int]] = None,) -> Reservation:
         """Gère la logique d'une réservation complète."""
         if not (0 <= seance_index < len(self.seances)):
              raise IndexError("Séance invalide")
@@ -99,9 +99,16 @@ class CinemaService:
         
         if nb_places <= 0:
             raise ValueError("Il faut réserver au moins 1 place.")
-            
+
+        if numeros_places is not None:
+            if len(numeros_places) != nb_places:
+                raise ValueError("Le nombre de places ne correspond pas au nombre de sièges choisis.")
+            seance.reserver_places_numeros(numeros_places)
+        else:
+            seance.reserver_places(nb_places)
+
         # Cette méthode lève une exception si la salle est pleine
-        seance.reserver_places(nb_places)
+        #seance.reserver_places(nb_places)
         
         resa = Reservation(seance, nom_client, nb_places, tarif)
         self.reservations.append(resa)
