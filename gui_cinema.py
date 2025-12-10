@@ -84,6 +84,7 @@ class CinemaGUI:
         self.create_reservation_tab()
         self.create_historique_tab()
         self.create_stats_tab()
+        self.create_film()
         
     def create_seances_tab(self):
         """Onglet pour voir toutes les séances"""
@@ -259,6 +260,67 @@ class CinemaGUI:
         
         # Charger les stats
         self.load_stats()
+
+    def create_film(self):
+        """Onglet pour créer ou modifier des films"""
+        film_frame = ttk.Frame(self.notebook)
+        self.notebook.add(film_frame, text="🎞️ Films")
+        
+        # Titre
+        ttk.Label(film_frame, text="Créer un film", font=('Arial', 14, 'bold')).pack(pady=10)
+        
+        # Frame principal
+        film_frame = ttk.Frame(film_frame)
+        film_frame.pack(fill='both', expand=True, padx=20, pady=10)
+        
+        # Grille pour les champs
+        creer_frame = ttk.Frame(film_frame)
+        creer_frame.pack(fill='x')
+        
+        # Nom
+        ttk.Label(creer_frame, text="Nom du film :").grid(row=0, column=0, sticky='w', padx=5, pady=5)
+        self.nom_entry = ttk.Entry(creer_frame, width=30, font=('Arial', 10))
+        self.nom_entry.grid(row=0, column=1, padx=5, pady=5, sticky='w')
+
+        # Durée
+        ttk.Label(creer_frame, text="Durée du film :").grid(row=1, column=0, sticky='w', padx=5, pady=5)
+        self.nom_film_spinbox = ttk.Spinbox(creer_frame, from_=1, to=10, width=10, font=('Arial', 10))
+        self.nom_film_spinbox.grid(row=1, column=1, padx=5, pady=5, sticky='w')
+
+        #Type de films
+        ttk.Label(creer_frame, text="Style de film:").grid(row=3, column=0, sticky='w', padx=5, pady=5)
+
+        self.style_combo = ttk.Combobox(creer_frame, width=27, state='readonly', font=('Arial', 10))
+
+        styles = list(StyleFilm)
+        # On affiche des noms : "Action", "Comédie", plutot que STYLEFILMS.Action etc
+        style_labels = []
+        for s in styles:
+            if s == StyleFilm.ACTION:
+                style_labels.append("Action")
+            elif s == StyleFilm.COMEDIE:
+                style_labels.append("Comédie")
+            elif s == StyleFilm.DRAME:
+                style_labels.append("Drame")
+            elif s == StyleFilm.SF:
+                style_labels.append("Science-fiction")
+            elif s == StyleFilm.HORREUR:
+                style_labels.append("Horreur")
+            elif s == StyleFilm.ANIMATION:
+                style_labels.append("Animation")
+        self.style_combo['values'] = styles
+
+        # valeur par défaut : le premier style
+        if style_labels:
+            self.style_combo.set(style_labels[0])
+        self.style_combo.grid(row=3, column=1, padx=5, pady=5, sticky='w')
+
+        # Bouton de réservation
+        
+        self.reserver_btn = ttk.Button(creer_frame, text="🎫 Créer", 
+                                     style='Action.TButton',
+                                     command=quit)
+        self.reserver_btn.grid(row=4, column=1, padx=5, pady=5, sticky='w')
         
     def create_footer(self):
         footer_frame = ttk.Frame(self.root)
