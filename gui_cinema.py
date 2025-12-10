@@ -84,6 +84,7 @@ class CinemaGUI:
         self.create_reservation_tab()
         self.create_historique_tab()
         self.create_stats_tab()
+        self.create_film()
         
     def create_seances_tab(self):
         """Onglet pour voir toutes les séances"""
@@ -259,6 +260,67 @@ class CinemaGUI:
         
         # Charger les stats
         self.load_stats()
+
+    def create_film(self):
+        """Onglet pour créer ou modifier des films"""
+        film_frame = ttk.Frame(self.notebook)
+        self.notebook.add(film_frame, text="🎞️ Films")
+        
+        # Titre
+        ttk.Label(film_frame, text="Créer un film", font=('Arial', 14, 'bold')).pack(pady=10)
+        
+        # Frame principal
+        film_frame = ttk.Frame(film_frame)
+        film_frame.pack(fill='both', expand=True, padx=20, pady=10)
+        
+        # Grille pour les champs
+        creer_frame = ttk.Frame(film_frame)
+        creer_frame.pack(fill='x')
+        
+        # Nom
+        ttk.Label(creer_frame, text="Nom du film :").grid(row=0, column=0, sticky='w', padx=5, pady=5)
+        self.nom_entry = ttk.Entry(creer_frame, width=30, font=('Arial', 10))
+        self.nom_entry.grid(row=0, column=1, padx=5, pady=5, sticky='w')
+
+        # Durée
+        ttk.Label(creer_frame, text="Durée du film :").grid(row=1, column=0, sticky='w', padx=5, pady=5)
+        self.nom_film_spinbox = ttk.Spinbox(creer_frame, from_=1, to=10, width=10, font=('Arial', 10))
+        self.nom_film_spinbox.grid(row=1, column=1, padx=5, pady=5, sticky='w')
+
+        #Type de films
+        ttk.Label(creer_frame, text="Style de film:").grid(row=3, column=0, sticky='w', padx=5, pady=5)
+
+        self.style_combo = ttk.Combobox(creer_frame, width=27, state='readonly', font=('Arial', 10))
+
+        styles = list(StyleFilm)
+        # On affiche des noms : "Action", "Comédie", plutot que STYLEFILMS.Action etc
+        style_labels = []
+        for s in styles:
+            if s == StyleFilm.ACTION:
+                style_labels.append("Action")
+            elif s == StyleFilm.COMEDIE:
+                style_labels.append("Comédie")
+            elif s == StyleFilm.DRAME:
+                style_labels.append("Drame")
+            elif s == StyleFilm.SF:
+                style_labels.append("Science-fiction")
+            elif s == StyleFilm.HORREUR:
+                style_labels.append("Horreur")
+            elif s == StyleFilm.ANIMATION:
+                style_labels.append("Animation")
+        self.style_combo['values'] = styles
+
+        # valeur par défaut : le premier style
+        if style_labels:
+            self.style_combo.set(style_labels[0])
+        self.style_combo.grid(row=3, column=1, padx=5, pady=5, sticky='w')
+
+        # Bouton de réservation
+        
+        self.reserver_btn = ttk.Button(creer_frame, text="🎫 Créer", 
+                                     style='Action.TButton',
+                                     command=quit)
+        self.reserver_btn.grid(row=4, column=1, padx=5, pady=5, sticky='w')
         
     def create_footer(self):
         footer_frame = ttk.Frame(self.root)
@@ -385,20 +447,138 @@ class CinemaGUI:
         if tarif is None:
             messagebox.showerror("Erreur", "Tarif invalide.")
             return
-            
+
+        self._reservation_en_cours = {
+            "nom": nom,
+            "nb_places": nb_places,
+            "tarif": tarif,
+        }
+
+        self.ouvrir_selection_places()
+
+    def ouvrir_selection_places(self):
+        """Ouvre une fenêtre avec toutes les places de la salle sous forme de grille."""
+        seance = self.seance_selectionnee
+        if not seance or not self._reservation_en_cours:
+            return
+
+        nb_demande = self._reservation_en_cours["nb_places"]
+
+        top = tk.Toplevel(self.root)
+        top.title(f"Choisissez vos {nb_demande} place(s)")
+        top.grab_set()  # bloque l'interaction avec la fenêtre principale
+
+        ttk.Label(
+            top,
+            text=f"Sélectionnez {nb_demande} place(s) pour {seance.film.titre}\n"
+                 f"Salle {seance.salle.nom} - capacité {seance.salle.capacite}",
+            font=("Arial", 11, "bold")
+        ).pack(pady=10)
+
+        grille_frame = ttk.Frame(top)
+        grille_frame.pack(padx=10, pady=5)
+
+        # On garde les variables des checkboxes pour savoir ce qui est coché
+        self._seat_vars = {}
+
+        nb_par_ligne = 10  # 10 sièges par rangée pour l'affichage
+        for num in range(1, seance.salle.capacite + 1):
+            var = tk.IntVar(value=0)
+            cb = tk.Checkbutton(
+                grille_frame,
+                text=str(num),
+                variable=var,
+                indicatoron=False,  # bouton "plein" plutôt que case à cocher classique
+                width=4,
+                padx=2,
+                pady=2
+            )
+
+            # Si la place est occupée, on la désactive
+            if num in seance.places_occupees:
+                cb.config(state="disabled")
+                cb.configure(fg="gray")
+            cb.grid(row=(num - 1) // nb_par_ligne, column=(num - 1) % nb_par_ligne, padx=2, pady=2)
+
+            self._seat_vars[num] = var
+
+        # Boutons de validation / annulation
+        btn_frame = ttk.Frame(top)
+        btn_frame.pack(pady=10, fill="x")
+
+        ttk.Button(
+            btn_frame,
+            text="Annuler",
+            command=top.destroy
+        ).pack(side="right", padx=5)
+
+        ttk.Button(
+            btn_frame,
+            text="Valider les places",
+            command=lambda: self.valider_selection_places(top)
+        ).pack(side="right", padx=5)
+
+    def valider_selection_places(self, window: tk.Toplevel):
+        """Récupère les places cochées, vérifie, crée la réservation et ferme la fenêtre."""
+        seance = self.seance_selectionnee
+        if not seance or not self._reservation_en_cours:
+            window.destroy()
+            return
+
+        nb_demande = self._reservation_en_cours["nb_places"]
+        nom = self._reservation_en_cours["nom"]
+        tarif = self._reservation_en_cours["tarif"]
+
+        # On récupère les numéros cochés et libres
+        places_choisies = [
+            num for num, var in self._seat_vars.items()
+            if var.get() == 1 and num not in seance.places_occupees
+        ]
+
+        if len(places_choisies) != nb_demande:
+            messagebox.showerror(
+                "Erreur",
+                f"Vous devez sélectionner exactement {nb_demande} place(s).\n"
+                f"Vous en avez sélectionné {len(places_choisies)}."
+            )
+            return
+
+        # On crée réellement la réservation via le service
+        try:
+            reservation = self.service.creer_reservation(
+                self.seance_index,
+                nom,
+                len(places_choisies),
+                tarif,
+                numeros_places=places_choisies,
+            )
+        except CinemaException as e:
+            messagebox.showerror("Erreur de réservation", str(e))
+            return
+        except Exception as e:
+            messagebox.showerror("Erreur", f"Erreur inattendue: {e}")
+            return
+
+        # Si tout va bien on ferme la fenêtre de choix
+        window.destroy()
+
+
         try:
             # Créer la réservation
-            reservation = self.service.creer_reservation(self.seance_index, nom, nb_places, tarif)
+            #reservation = self.service.creer_reservation(self.seance_index, nom, nb_places, tarif)
             
             # Afficher le succès avec plus de détails
             success_message = f"""✅ RÉSERVATION CONFIRMÉE ✅
+
+
 
 🎫 Numéro de ticket: {reservation.id}
 👤 Client: {nom}
 📽️ Film: {reservation.seance.film.titre}
 🏛️ Salle: {reservation.seance.salle.nom}
 🕐 Horaire: {reservation.seance.horaire.strftime('%d/%m/%Y à %H:%M')}
-🎫 Places: {nb_places} × {tarif.label}
+🎫 Places: {len(places_choisies)} × {tarif.label}
+🪑 Sièges: {', '.join(str(p) for p in sorted(places_choisies))}
 💰 Total payé: {reservation.prix_total} €
 
 Merci de votre confiance! 
@@ -412,7 +592,8 @@ Présentez-vous 15 minutes avant la séance."""
             self.tarif_combo.set(f"{list(Tarif)[0].label} ({list(Tarif)[0].coeff*100:.0f}%)")
             self.seance_selectionnee = None
             self.seance_index = -1
-            
+            self._reservation_en_cours = None 
+
             # Actualiser toutes les vues
             self.load_seances_tree()
             self.load_seances_reservation()
