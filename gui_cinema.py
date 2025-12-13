@@ -708,7 +708,8 @@ class CinemaGUI:
         self.stats_text.pack(fill='both', expand=True)
         
         self.load_stats()
-        
+
+
     def create_manager_tab(self, notebook):
         """Onglet manager pour gérer le cinéma"""
         frame = ttk.Frame(notebook, style='Content.TFrame')
@@ -717,18 +718,85 @@ class CinemaGUI:
         # Notebook interne pour les sous-sections
         self.manager_notebook = ttk.Notebook(frame)
         self.manager_notebook.pack(fill='both', expand=True, padx=20, pady=20)
-        
-        self.create_manager_films_tab(self.manager_notebook)
-        self.create_manager_seances_tab(self.manager_notebook)
-        self.create_manager_salles_tab(self.manager_notebook)
-        self.create_manager_tarifs_tab(self.manager_notebook)
-        self.create_manager_rapports_tab(self.manager_notebook)
-        
-        # Charger les listes initiales
-        self.load_manager_films_list()
-        self.load_manager_seances_list()
-        self.load_manager_salles_list()
-        self.load_manager_tarifs_list()
+       
+        try:
+            self.create_mdp(self.manager_notebook)
+        except Exception:
+            pass
+
+    def create_mdp(self, notebook) : 
+        """Onglet de saisie du mot de passe manager."""
+        frame = ttk.Frame(notebook, style='Content.TFrame')
+        notebook.add(frame, text='🔒 MDP')
+
+        content = tk.Frame(frame, bg=Colors.LIGHTER)
+        content.pack(fill='both', expand=True, padx=30, pady=30)
+
+        tk.Label(content, text="Accès Manager",
+                font=('Segoe UI', 16, 'bold'), fg=Colors.PRIMARY, bg=Colors.LIGHTER).pack(anchor='w')
+
+        tk.Label(content, text="Entrez le mot de passe (1234) :",
+                font=('Segoe UI', 11), fg=Colors.DARK, bg=Colors.LIGHTER).pack(anchor='w', pady=(15, 5))
+
+        self.mgr_mdp_entry = ttk.Entry(content, width=30, show='*')
+        self.mgr_mdp_entry.pack(anchor='w')
+
+        def check_mdp(event=None):
+            from tkinter import messagebox
+            val = (self.mgr_mdp_entry.get() or '').strip()
+            if val == '1234':
+                try:
+                    messagebox.showinfo('Succès', 'Mot de passe accepté')
+                except Exception:
+                    pass
+
+                # Ajouter les onglets manager si pas déjà faits
+                if not getattr(self, '_manager_unlocked', False):
+                    try:
+                        self.create_manager_films_tab(self.manager_notebook)
+                        self.create_manager_seances_tab(self.manager_notebook)
+                        self.create_manager_salles_tab(self.manager_notebook)
+                        self.create_manager_tarifs_tab(self.manager_notebook)
+                        self.create_manager_rapports_tab(self.manager_notebook)
+
+                        # Charger les listes initiales (silencieux en cas d'erreur)
+                        try:
+                            self.load_manager_films_list()
+                            self.load_manager_seances_list()
+                            self.load_manager_salles_list()
+                            self.load_manager_tarifs_list()
+                        except Exception:
+                            pass
+
+                        self._manager_unlocked = True
+                        # Sélectionner le premier onglet manager ajouté
+                        try:
+                            self.manager_notebook.select(1)
+                        except Exception:
+                            pass
+                        # Supprimer l'onglet MDP
+                        try:
+                            self.manager_notebook.forget(frame)
+                        except Exception:
+                            pass
+                    except Exception:
+                        pass
+                return 1
+            else:
+                try:
+                    messagebox.showerror('Erreur', 'Mot de passe incorrect')
+                except Exception:
+                    pass
+                return 0
+
+        btn_frame = tk.Frame(content, bg=Colors.LIGHTER)
+        btn_frame.pack(fill='x', pady=(20, 0))
+
+        validate_btn = ttk.Button(btn_frame, text='Valider', command=check_mdp, style='Primary.TButton')
+        validate_btn.pack(side='left')
+
+        # Lier la touche Entrée au contrôle
+        self.mgr_mdp_entry.bind('<Return>', lambda e: check_mdp())
         
     def create_manager_films_tab(self, notebook):
         """Manager: Gestion des films"""
@@ -807,20 +875,7 @@ class CinemaGUI:
         col4 = tk.Frame(row2_frame, bg='white')
         col4.pack(side='right', fill='x', expand=True)
         
-        tk.Label(col4, text='� Synopsis',
-                font=('Segoe UI', 11, 'bold'),
-                fg=Colors.DARK, bg='white').pack(anchor='w', pady=(0, 8))
-        self.mgr_film_synopsis_short = ttk.Entry(col4, width=30)
-        self.mgr_film_synopsis_short.pack(fill='x')
         
-        # Synopsis complet
-        tk.Label(form_frame, text='� Description complète',
-                font=('Segoe UI', 11, 'bold'),
-                fg=Colors.DARK, bg='white').pack(anchor='w', padx=20, pady=(20, 8))
-        self.mgr_film_synopsis = tk.Text(form_frame, height=3, width=50,
-                                     font=('Segoe UI', 10), wrap=tk.WORD,
-                                     relief='solid', bd=1, padx=5, pady=5)
-        self.mgr_film_synopsis.pack(fill='x', padx=20, pady=(0, 20))
         
         # Bouton
         btn_frame = tk.Frame(form_frame, bg='white')
@@ -1833,13 +1888,13 @@ Réalisateur: {realisateur if realisateur else 'Non spécifié'}""")
                 if g.value == genre_str:
                     genre_enum = g
                     break
-            resume = self.mgr_film_synopsis.get("1.0", tk.END).strip()
+            #resume = self.mgr_film_synopsis.get("1.0", tk.END).strip()
                     
             if not genre_enum:
                 messagebox.showerror('Erreur', f'Genre "{genre_str}" non trouve')
                 return
                 
-            film = Film(titre=nom, duree=duree, style=genre_enum, note=note, resume=resume if resume else "Pas de synopsis")
+            film = Film(titre=nom, duree=duree, style=genre_enum, note=note, resume="Pas de synopsis")
             self.service.films.append(film)
             
             # Créer automatiquement 4 séances par jour sur 3 jours pour le nouveau film
@@ -1853,7 +1908,6 @@ Réalisateur: {realisateur if realisateur else 'Non spécifié'}""")
             self.mgr_film_duree.set('120')
             self.mgr_film_genre.set(self.mgr_film_genre['values'][0] if self.mgr_film_genre['values'] else '')
             self.mgr_film_note.set('7.0')
-            self.mgr_film_synopsis.delete("1.0", tk.END)
             
             # Actualiser les listes
             self.mgr_seance_film['values'] = [f.titre for f in self.service.films]
