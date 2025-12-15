@@ -91,5 +91,5 @@ Suivez ces étapes pour lancer l'application sur votre machine.
     ```bash
     python run_gui.py
     ```
-
+>
 ---
