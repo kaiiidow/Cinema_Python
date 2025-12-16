@@ -462,19 +462,19 @@ class CinemaGUI:
                 bar_fill.pack(side='left', fill='y')
                 
                 # Bouton de réservation
-                    btn_frame = tk.Frame(salle_card, bg=Colors.LIGHT)
-                    btn_frame.pack(fill='x', padx=15, pady=(10, 0))
+                btn_frame = tk.Frame(salle_card, bg=Colors.LIGHT)
+                btn_frame.pack(fill='x', padx=15, pady=(10, 0))
                     
-                    def make_reserve_handler(s):
-                        def on_reserve():
-                            self.seance_selectionnee = s
-                            self.open_quick_reservation(s)
-                        return on_reserve
+                def make_reserve_handler(s):
+                    def on_reserve():
+                        self.seance_selectionnee = s
+                        self.open_quick_reservation(s)
+                    return on_reserve
                     
-                    ttk.Button(btn_frame, text='RESERVER',
-                                 command=make_reserve_handler(seance),
-                                 style='Success.TButton',
-                                 state='normal' if seance.places_disponibles > 0 else 'disabled').pack(side='right')
+                ttk.Button(btn_frame, text='RESERVER',
+                                command=make_reserve_handler(seance),
+                                style='Success.TButton',
+                                state='normal' if seance.places_disponibles > 0 else 'disabled').pack(side='right')
     
     def _display_sidebar_days(self, film, day1, day2):
         """Construit la barre latérale de navigation par jour."""
