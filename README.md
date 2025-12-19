@@ -1,95 +1,155 @@
-# 🎬 Cinéma Deluxe - Système de Gestion et Réservation
-Bienvenue sur le projet **Cinéma Deluxe**, une application de bureau complète pour la gestion et la réservation de séances de cinéma, développée en Python avec l'interface graphique Tkinter.
 
-Ce projet simule un système de cinéma moderne, offrant une interface intuitive pour les clients et un panneau de contrôle puissant pour les administrateurs. Il a été conçu pour démontrer l'application des principes de génie logiciel (conception modulaire, séparation des préoccupations) dans un contexte réel et interactif.
+# 🎬 Cinema Python - Interface Tkinter
 
----
+Un système de réservation de cinéma en Python avec interface graphique moderne utilisant Tkinter et programmation orientée objet.
 
-## ✨ Aperçu de l'Interface
+## 🚀 Nouvelles fonctionnalités (v2.0)
 
+- **Interface graphique complète** avec Tkinter
+- **5 onglets** : Séances, Réservation, Historique, Statistiques, Management
+- **Visualisation avancée** des séances avec codes couleur
+- **Récapitulatif en temps réel** lors de la réservation
+- **Statistiques détaillées** du cinéma
+- **Plus de données de démonstration** (8 films, 5 salles, 10+ séances)
+- **Possibilité de personnalisation** (Création/Modification de films et de salles)
 
-| Vue Principale des Séances | Sélection des Sièges | Panneau Manager |
-| :------------------------: | :--------------------: | :---------------: |
-| ![Aperçu des séances](https://via.placeholder.com/400x250.png?text=Vue+Principale) | ![Sélection des sièges](https://via.placeholder.com/400x250.png?text=Sélection+des+Sièges) | ![Panneau Manager](https://via.placeholder.com/400x250.png?text=Panneau+Manager) |
-
----
-
-## 🚀 Fonctionnalités Clés
-
-Le système est divisé en deux expériences distinctes pour répondre aux besoins de chaque type d'utilisateur.
-
-### 👤 Espace Client
-
-Une interface épurée et intuitive pour une réservation sans effort.
-
-- **Navigation Facile :** Consultez les films à l'affiche et naviguez entre les jours de la semaine.
-- **Disponibilité en Temps Réel :** Des barres de progression visuelles indiquent le taux de remplissage de chaque séance.
-- **Plan de Salle Interactif :** Choisissez vos sièges préférés directement sur un plan de la salle, avec une distinction claire entre les places libres, occupées et sélectionnées.
-- **Historique Personnel :** Gardez une trace de toutes vos réservations.
-
-### ⚙️ Panneau Manager
-
-Un centre de contrôle complet pour une gestion totale du cinéma.
-
-- **Gestion des Films :** CRUD (Créer, Lire, Mettre à jour, Supprimer) complet pour le catalogue de films, incluant titre, durée, genre, note et synopsis.
-- **Gestion des Salles :** Gérez les salles, leur capacité et leur type (Classique, IMAX, Dolby, etc.).
-- **Gestion des Séances :**
-    - Planifiez de nouvelles séances avec une grande flexibilité.
-    - Visualisez les séances existantes dans une **vue hiérarchique intelligente** (Jour → Film → Séance) pour une lisibilité optimale.
-- **Gestion des Tarifs :** Définissez et ajustez dynamiquement les tarifs (Plein, Étudiant, Senior...).
-- **Rapports et Analytiques :** Accédez à des statistiques détaillées sur les revenus, les films les plus populaires et le taux d'occupation pour prendre des décisions éclairées.
-
----
-
-## 🛠️ Architecture et Technologies
-
-Le projet suit une architecture inspirée du modèle MVC (Modèle-Vue-Contrôleur) pour garantir une séparation claire des préoccupations et faciliter la maintenance.
-
-- **Langage :** **Python 3**
-- **Interface Graphique :** **Tkinter** (avec le module `ttk` pour un style moderne et des widgets thématiques).
-- **Structure des Données :** Utilisation des `dataclasses` pour des modèles de données clairs et robustes.
-
-### Structure du Projet
+## 📁 Structure du projet
 
 ```
-.
-├── models/         # Structures de données (Film, Salle, Seance...)
-│   ├── enums.py
-│   ├── exceptions.py
-│   └── ...
-├── services/       # Logique métier (CinemaService)
-│   └── cinema_service.py
-├── gui_cinema.py   # Couche de présentation (toute la logique de l'interface)
-└── run_gui.py      # Point d'entrée de l'application
+Cinema_Python/
+├── gui_cinema.py        # Interface graphique complète
+├── main.py              # Interface console avec tkinter basique
+├── run_gui.py           # Lanceur simplifié pour l'interface graphique
+├── README.md            # Ce fichier (guide pour la version tkinter)
+├── models/              # Modèles de données
+│   ├── __init__.py
+│   ├── enums.py         # Énumérations (Tarif, TypeSalle, StyleFilm)
+│   ├── exceptions.py    # Exceptions métier
+│   ├── film.py          # Classe Film
+│   ├── salle.py         # Classe Salle  
+│   ├── seance.py        # Classe Seance
+│   └── reservation.py   # Classe Reservation
+└── services/            # Services métier
+    ├── __init__.py
+    └── cinema_service.py # Service principal (amélioré)
 ```
 
+## 🎯 Utilisation
+
+### Interface Graphique Complète (Recommandée)
+```bash
+python gui_cinema.py
+```
+
+### Lanceur Simplifié
+```bash
+python run_gui.py
+```
+
+### Interface Console avec Tkinter (Version transformée)
+```bash
+python main.py
+```
+
+## 🖥️ Interface Graphique - Guide
+
+### 📅 Onglet "Séances"
+- Visualisation de toutes les séances dans un tableau
+- **Codes couleur** :
+  - 🟢 Vert : Séances avec beaucoup de places
+  - 🟡 Jaune : Peu de places restantes  
+  - 🔴 Rouge : Séances complètes
+
+### 🎫 Onglet "Réserver"
+1. **Sélection de séance** : Cliquez sur la séance désirée
+2. **Informations client** : Nom, nombre de places, type de tarif
+3. **Récapitulatif temps réel** : Prix calculé automatiquement
+4. **Validation** : Bouton "RÉSERVER" pour confirmer
+
+### 📋 Onglet "Historique"
+- Liste complète des réservations effectuées
+- Détails complets : ticket, client, film, horaire, prix
+- Bouton pour effacer l'historique
+
+### 📊 Onglet "Statistiques"
+- **Données générales** : nombre de séances, réservations, revenus
+- **Films populaires** : classement par nombre de places vendues
+- **Répartition des tarifs** : pourcentages d'utilisation
+- **Occupation des salles** : taux de remplissage
+
+### Onglet "Management"
+- **Modification et création salles** : nombre de places, type de salle
+- **Modification et création de films** : titre, duréé, type, note
+
+## 🎭 Données de démonstration
+
+### Films disponibles
+- **Inception** (SF, 148 min) - Note: 8.8/10
+- **Avatar 2** (SF, 192 min) - Note: 7.9/10  
+- **Le Roi Lion** (Animation, 88 min) - Note: 8.5/10
+- **Interstellar** (SF, 169 min) - Note: 8.6/10
+- **La La Land** (Comédie, 128 min) - Note: 8.0/10
+- **The Dark Knight** (Action, 152 min) - Note: 9.0/10
+- **Coco** (Animation, 105 min) - Note: 8.4/10
+- **Parasite** (Drame, 132 min) - Note: 8.5/10
+
+### Salles disponibles
+- **L'Odyssée** (100 places) - Classique
+- **Le Grand Large** (50 places) - IMAX
+- **Dolby Vision** (80 places) - Dolby Cinema
+- **3D Experience** (60 places) - 3D
+- **La Petite Salle** (30 places) - Classique
+
+## 💰 Système de tarification
+
+### Types de tarifs
+- **Plein tarif** : 100% du prix de base (10€)
+- **Étudiant** : 80% du prix de base (-20%)
+- **Senior** : 90% du prix de base (-10%) 
+- **Enfant** : 60% du prix de base (-40%)
+
+### Suppléments par type de salle
+- **Classique** : Prix de base (10€)
+- **IMAX/Dolby/3D** : Supplément de +2,50€
+
+### Exemple de calcul
+```
+Film en salle IMAX avec tarif Étudiant (2 places) :
+(10€ + 2,50€) × 0.8 × 2 = 20€
+```
+
+## 🎨 Améliorations de l'interface
+
+- **Style moderne** avec thème Clam de ttk
+- **Codes couleur** pour l'état des séances
+- **Police Courier** pour les données tabulaires  
+- **Icônes emoji** pour une meilleure UX
+- **Messages de confirmation** détaillés
+- **Mise à jour automatique** des vues après réservation
+
+## 📋 Prérequis
+
+- **Python 3.7+**
+- **tkinter** (inclus par défaut avec Python)
+- Modules standard : `datetime`, `dataclasses`, `enum`, `uuid`
+
+## 🎯 Cas d'usage
+
+1. **Consultation rapide** des séances via l'onglet "Séances"
+2. **Réservation guidée** avec récapitulatif temps réel  
+3. **Suivi des réservations** dans l'historique
+4. **Analyse des performances** via les statistiques
+5. **Gestion des erreurs** (salle pleine, données invalides)
+
+### ✅ Version gui_cinema.py (Tkinter avancée) 
+- Interface complète avec 4 onglets
+- Fonctionnalités avancées (statistiques, codes couleur)
+- Expérience utilisateur optimisée
+
+### ✅ Améliorations du backend
+- Service enrichi avec plus de données
+- Nouvelles méthodes (statistiques, recherche)
+- Gestion améliorée des erreurs
+
 ---
-
-## 🏃 Démarrage Rapide
-
-Suivez ces étapes pour lancer l'application sur votre machine.
-
-### Prérequis
-
-- **Python 3.7 ou supérieur.**
-- Le module `tkinter` doit être installé (il est généralement inclus par défaut avec Python).
-
-### Installation et Lancement
-
-1.  **Clonez le dépôt sur votre machine locale :**
-   ```bash
-   git clone <URL_DU_DEPOT>
-   ```
-
-2.  **Naviguez vers le répertoire du projet :**
-   ```bash
-   cd Cinema_Python-main
-   ```
-
-3.  **Exécutez le script principal :**
-   > L'application est conçue pour se lancer en mode plein écran pour une expérience immersive.
-    ```bash
-    python run_gui.py
-    ```
->
----
+*Version 2.0 - Interface Tkinter
